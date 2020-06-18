@@ -10,4 +10,10 @@ export default class UsersMapper {
       .setQueryArgs([email, password])
       .execute();
   }
+  fetch(email: string) {
+    return this.queryHelper
+      .setQuery("SELECT * FROM users WHERE email=?")
+      .setQueryArgs(email)
+      .execute();
+  }
 }

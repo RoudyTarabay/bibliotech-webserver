@@ -44,13 +44,33 @@ export default class UserRegistration extends DataSource {
     //one-way hashing. Bcrypt is the recommended script.
     //not secure to hash in mysql due to mysql logging.
     bcrypt.genSalt(parseInt(process.env.SALT_ROUNDS), (err, salt) => {
-      console.log("insert", salt, process.env.SALT_ROUNDS);
-
       bcrypt.hash(password, salt, (err, hash) => {
-        console.log("hash", password, hash);
-
         const response = this.usersMapper.insert(email, encrypt(hash));
       });
     });
+  }
+  async login(email: string, password: string) {
+    const response = await this.usersMapper.fetch(email);
+    if (!response.length)
+      return {
+        success: false,
+        message: "This email is not registered",
+      };
+
+    const isPassword = await bcrypt.compare(
+      password,
+      decrypt(response[0].password)
+    );
+    console.log("isPassword", isPassword);
+    if (isPassword)
+      return {
+        success: true,
+        id: response[0].id,
+      };
+    else
+      return {
+        success: false,
+        message: "Wrong password",
+      };
   }
 }

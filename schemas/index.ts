@@ -1,11 +1,13 @@
 import { gql } from "apollo-server";
 
 export const typeDefs = gql`
-  type Users {
+  type User {
     id: Int
+    email: String
+    token: String
   }
   type Query {
-    user: Users
+    users: User
   }
   type MutationResponse {
     success: Boolean!
@@ -19,5 +21,6 @@ export const typeDefs = gql`
       password: String
       cpassword: String
     ): MutationResponse
+    login(email: String, password: String): MutationResponse
   }
 `;

@@ -14,6 +14,7 @@ export default class SQLQueryHelper {
     try {
       const response = await pool.query(this.query, this.queryArgs);
       console.log("executing", response);
+      return response;
     } catch (err) {
       console.log("error", err, err.message);
     }
