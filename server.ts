@@ -4,13 +4,7 @@ import { ApolloServer } from "apollo-server";
 import { typeDefs } from "./schemas";
 import UserRegistrationAPI from "./datasources/UserRegistration";
 import { resolvers } from "./resolvers";
-// app.use(
-//   "/graphql",
-//   expressGraphQL({
-//     schema: schema,
-//     graphiql: true,
-//   })
-// );'
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -20,5 +14,5 @@ const server = new ApolloServer({
 });
 
 server.listen().then(({ url }) => {
-  console.log("Server Running");
+  // console.log("Server Running");
 });

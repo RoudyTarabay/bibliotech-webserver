@@ -11,7 +11,6 @@ export const resolvers = {
     },
     login: (_, { email, password }, { dataSources }) => {
       const response = dataSources.userRegistrationAPI.login(email, password);
-      console.log("response", response);
       return response;
     },
   },
