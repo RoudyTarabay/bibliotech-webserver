@@ -5,11 +5,13 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc-watch --onSuccess \"node \"dist/server.js"
+    "start": "tsc-watch --onSuccess \"node \"dist/server.js",
+    "lint-staged": "lint-staged"
   },
   "lint-staged": {
-    "*.js": "eslint"
+    "*.ts": "eslint"
   },
+  "pre-commit":"lint-staged",
   "author": "",
   "license": "ISC",
   "dependencies": {
