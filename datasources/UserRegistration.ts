@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const encrypt = (hash) => {
-  let cipher = crypto.createCipheriv(
+  const cipher = crypto.createCipheriv(
     "aes-256-cbc",
     process.env.ENC_KEY,
     process.env.IV
@@ -16,12 +16,12 @@ const encrypt = (hash) => {
   return encrypted;
 };
 const decrypt = (encrypted) => {
-  let decipher = crypto.createDecipheriv(
+  const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
     process.env.ENC_KEY,
     process.env.IV
   );
-  let decrypted = decipher.update(encrypted, "base64", "utf8");
+  const decrypted = decipher.update(encrypted, "base64", "utf8");
   return decrypted + decipher.final("utf8");
 };
 export default class UserRegistration extends DataSource {
@@ -48,6 +48,10 @@ export default class UserRegistration extends DataSource {
         const response = this.usersMapper.insert(email, encrypt(hash));
       });
     });
+    return {
+      success: true,
+      message: "Signup successful, check your inbox",
+    };
   }
   async login(email: string, password: string) {
     const response = await this.usersMapper.fetch(email);
@@ -61,7 +65,6 @@ export default class UserRegistration extends DataSource {
       password,
       decrypt(response[0].password)
     );
-    console.log("isPassword", isPassword);
     if (isPassword)
       return {
         success: true,
