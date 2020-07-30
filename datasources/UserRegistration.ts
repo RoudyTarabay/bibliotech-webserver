@@ -3,6 +3,7 @@ import UsersMapper from "../mappers/UsersMapper";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import { ApolloError } from "apollo-server";
 
 dotenv.config();
 const encrypt = (hash) => {
@@ -25,27 +26,51 @@ const decrypt = (encrypted) => {
   return decrypted + decipher.final("utf8");
 };
 export default class UserRegistration extends DataSource {
-  context: any;
-  usersMapper: any;
+  usersMapper: UsersMapper;
   constructor() {
     super();
     this.usersMapper = new UsersMapper();
   }
-
-  initialize(config) {
-    this.context = config.context;
+  async userExists(
+    email: string
+  ): Promise<
+    | boolean
+    | {
+        success: boolean;
+        message: string;
+      }
+  > {
+    const response = await this.usersMapper.fetch(email);
+    return response.length != 0;
   }
-  insert(email: string, password: string, cpassword: string) {
+  async insert(
+    email: string,
+    password: string,
+    cpassword: string
+  ): Promise<{ success: boolean; message: string }> {
     if (password !== cpassword)
-      return {
-        success: false,
-        message: "password mismatch",
-      };
+      throw new ApolloError("Passwords mismatch", 1000 + "", {
+        isManuallyThrown: true,
+      });
+    const userExists = await this.userExists(email);
+    if (userExists)
+      throw new ApolloError("Email already in use", 1001 + "", {
+        isManuallyThrown: true,
+      });
     //one-way hashing. Bcrypt is the recommended script.
     //not secure to hash in mysql due to mysql logging.
     bcrypt.genSalt(parseInt(process.env.SALT_ROUNDS), (err, salt) => {
       bcrypt.hash(password, salt, (err, hash) => {
         const response = this.usersMapper.insert(email, encrypt(hash));
+        if (response)
+          return {
+            success: true,
+            message: "Signup successful, check your inbox",
+          };
+        else
+          throw new ApolloError("Failed to sign up", 1002 + "", {
+            isManuallyThrown: true,
+          });
       });
     });
     return {
@@ -53,14 +78,15 @@ export default class UserRegistration extends DataSource {
       message: "Signup successful, check your inbox",
     };
   }
-  async login(email: string, password: string) {
+  async login(
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; id?: number; message?: string }> {
     const response = await this.usersMapper.fetch(email);
     if (!response.length)
-      return {
-        success: false,
-        message: "This email is not registered",
-      };
-
+      throw new ApolloError("This email is not registered", 1003 + "", {
+        isManuallyThrown: true,
+      });
     const isPassword = await bcrypt.compare(
       password,
       decrypt(response[0].password)
@@ -71,9 +97,8 @@ export default class UserRegistration extends DataSource {
         id: response[0].id,
       };
     else
-      return {
-        success: false,
-        message: "Wrong password",
-      };
+      throw new ApolloError("Wrong password", 1004 + "", {
+        isManuallyThrown: true,
+      });
   }
 }
