@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "^2.13.1",
+    "apollo-server": "^2.25.4",
     "bcrypt": "^4.0.1",
     "csprng": "^0.1.2",
     "dotenv": "^8.2.0",
